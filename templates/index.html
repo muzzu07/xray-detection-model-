@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Ray Image Classifier - Shahid's Project</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* ================= ROOT VARIABLES ================= */
+        :root {
+            --primary-blue: #3498db;
+            --primary-green: #2ecc71;
+            --light-blue: #e8f4fb;
+            --light-green: #eafaf1;
+            --bg-color: #f8fbfd;
+            --card-bg: #ffffff;
+            --text-color-dark: #2c3e50;
+            --text-color-light: #7f8c8d;
+            --border-color: #dfe6e9;
+            --danger-red: #e74c3c;
+            --warning-orange: #f39c12;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 45px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin: auto;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--primary-green);
+        }
+
+        .header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: var(--text-color-dark);
+        }
+
+        .header p {
+            color: var(--text-color-light);
+            margin-bottom: 35px;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .disclaimer {
+            font-size: 0.9em;
+            color: var(--danger-red);
+            font-weight: 600;
+            margin-bottom: 30px;
+            padding: 10px;
+            border: 1px solid var(--danger-red);
+            border-radius: 8px;
+            background-color: rgba(231, 76, 60, 0.05);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 35px;
+            transition: border-color 0.3s, background-color 0.3s;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-blue);
+            background-color: var(--light-blue);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-prompt {
+            color: var(--text-color-light);
+            font-size: 1.1em;
+            margin-top: 15px;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+        }
+
+        .custom-file-upload {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary-green);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
+
+        #error-message {
+            color: var(--danger-red);
+            margin-top: 25px;
+            font-weight: 600;
+            display: none;
+            padding: 15px;
+            background-color: #fef2f2;
+            border-radius: 8px;
+            border: 1px solid var(--danger-red);
+
+
+        }
+
+        /* ✅ Image Preview Size Fix */
+        #image-preview-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            width: auto;
+            height: auto;
+            border-radius: 10px;
+            object-fit: contain;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="logo">
+            Medi<span>Scan</span> AI
+        </div>
+
+        <div class="header">
+            <h1>Intelligent X-Ray Image Classification</h1>
+            <p>
+                Utilize our advanced AI to analyze chest X-ray images and identify potential
+                indicators for
+                <strong style="color: var(--primary-green);">Normal</strong> lung conditions,
+                <strong style="color: var(--warning-orange);">Pneumonia</strong>, or
+                <strong style="color: var(--danger-red);">Tuberculosis</strong>.
+            </p>
+        </div>
+
+        <p class="disclaimer">
+            <i class="fas fa-exclamation-triangle"></i>
+            This AI model is for educational and experimental purposes ONLY and should NOT be used
+            for real medical diagnosis or treatment decisions. Always consult a qualified medical professional.
+        </p>
+
+        <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+
+            <label for="file-upload" class="upload-area">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+
+                <span class="custom-file-upload">
+                    Browse for X-Ray Image
+                </span>
+
+                <input id="file-upload" name="file" type="file" accept="image/jpeg,image/png" required>
+
+                <p class="upload-prompt" id="initial-upload-prompt">
+                    Drag & drop your X-Ray image here, or click to browse.
+                </p>
+
+                <div id="image-preview-container" style="display:none;">
+                    <img id="image-preview" src="#" alt="Image Preview" />
+                    <p class="file-name-display" id="file-name"></p>
+                </div>
+            </label>
+
+            <button type="submit" id="submit-btn" class="btn-submit" disabled>
+                <span id="btn-text">Classify Image</span>
+                <div id="spinner" class="spinner" style="display:none;"></div>
+            </button>
+
+        </form>
+
+        <div id="result-display-area" style="display:none;"></div>
+        <div id="error-message" style="display:none;"></div>
+
+        <div class="footer">
+            Developed with <i class="fas fa-heart" style="color: #e74c3c;"></i>
+            by <span style="font-weight: 600;">Muzammil</span>
+        </div>
+
+    </div>
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const uploadForm = document.getElementById('upload-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const spinner = document.getElementById('spinner');
+        const fileNameDisplay = document.getElementById('file-name');
+        const initialUploadPrompt = document.getElementById('initial-upload-prompt');
+        const resultDisplayArea = document.getElementById('result-display-area');
+        const errorMessageDiv = document.getElementById('error-message');
+        const uploadArea = document.querySelector('.upload-area');
+
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                    initialUploadPrompt.style.display = 'none';
+                    fileNameDisplay.textContent = "Selected: " + fileInput.files[0].name;
+                    submitBtn.disabled = false;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        uploadForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select an image.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            btnText.textContent = 'Classifying...';
+            spinner.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                resultDisplayArea.innerHTML = `
+    <div style="
+        background: linear-gradient(135deg, #f8fbff, #eef5ff);
+        border-radius: 18px;
+        padding: 30px;
+        margin-top: 25px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        border: 1px solid #e3eaf5;
+    ">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+        ">
+            <h2 style="margin:0; font-size:1.6rem;">
+                ${data.title}
+            </h2>
+
+            <span style="
+                background:${data.risk === 'Low' ? '#2ecc71' : data.risk === 'Moderate' ? '#f39c12' : '#e74c3c'};
+                color:white;
+                padding:8px 14px;
+                border-radius:50px;
+                font-size:0.85rem;
+                font-weight:600;
+            ">
+                Risk: ${data.risk}
+            </span>
+        </div>
+
+        <p style="
+            font-size:1rem;
+            line-height:1.7;
+            color:#4a4a4a;
+            margin-bottom:20px;
+            white-space: pre-line;
+        ">
+            ${data.description}
+        </p>
+
+        <div style="
+            background:white;
+            padding:18px;
+            border-radius:12px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom:20px;
+        ">
+            <strong>Model Confidence:</strong> ${data.confidence}%
+
+            <div style="
+                height:8px;
+                background:#e0e6ed;
+                border-radius:10px;
+                margin-top:10px;
+                overflow:hidden;
+            ">
+                <div style="
+                    width:${data.confidence}%;
+                    height:100%;
+                    background:${data.risk === 'Low' ? '#2ecc71' : data.risk === 'Moderate' ? '#f39c12' : '#e74c3c'};
+                "></div>
+            </div>
+        </div>
+
+        <div style="
+            background:#eef7ff;
+            padding:15px;
+            border-radius:10px;
+            font-size:0.9rem;
+            color:#2c3e50;
+            border-left:4px solid #3498db;
+            margin-bottom:20px;
+        ">
+            <strong>Recommended Action:</strong><br>
+            ${data.recommendation}
+        </div>
+
+
+    </div>
+`;
+                resultDisplayArea.style.display = 'block';
+
+            } catch (error) {
+                errorMessageDiv.textContent = "Error: " + error.message;
+                errorMessageDiv.style.display = 'block';
+            }
+
+            submitBtn.disabled = false;
+            btnText.textContent = 'Classify Image';
+            spinner.style.display = 'none';
+        });
+    </script>
+
+</body>
+
+</html>
